@@ -96,7 +96,7 @@ namespace PigDice
             Console.ForegroundColor = White;
             for (var row = 0; row < 5; row++)
             {
-                Console.WriteLine($"{_diceDrawings[value1 - 1][row].ToString()}    {_diceDrawings[value2 - 1][row].ToString()}");
+                Console.WriteLine($"{_diceDrawings[value1 - 1][row]}    {_diceDrawings[value2 - 1][row]}");
             }
         }
 
@@ -120,16 +120,21 @@ namespace PigDice
             Console.WriteLine("Press <Space> to keep going or <Enter> to hold.");
         }
 
-        private static bool HasWon(Player player)
+        private void CheckForWin(Player player)
         {
-            return player.TotalScore >= 100;
+            if (player.TotalScore < 100)
+            {
+                return;
+            }
+
+            WinningPlayer = player;
+            GameComplete = true;
         }
 
         public void PlayGame()
         {
             var playerIndex = 0;
             GameComplete = false;
-            WinningPlayer = null;
 
             while (!GameComplete)
             {
@@ -138,13 +143,13 @@ namespace PigDice
                 var currentPlayer = Players[playerIndex];
                 Console.WriteLine("Press any key to start your turn.");
                 Console.ReadKey(false);
-                playerIndex = SwitchPlayer(playerIndex, currentPlayer);
+                playerIndex = PlayTurn(playerIndex, currentPlayer);
             }
             Console.WriteLine($"{WinningPlayer.Name} has won!");
             Console.ReadKey();
         }
 
-        private int SwitchPlayer(int playerIndex, Player currentPlayer)
+        private int PlayTurn(int playerIndex, Player currentPlayer)
         {
             while (true)
             {
@@ -174,11 +179,7 @@ namespace PigDice
                 currentPlayer.TotalScore += currentPlayer.RoundScore;
                 Players[playerIndex].RoundScore = 0;
 
-                if (HasWon(currentPlayer))
-                {
-                    WinningPlayer = currentPlayer;
-                    GameComplete = true;
-                }
+                CheckForWin(currentPlayer);
 
                 playerIndex = (playerIndex + 1) % Players.Count;
                 break;
